@@ -66,8 +66,7 @@ public class VoicechatClientApiImpl extends VoicechatApiImpl implements Voicecha
             }
             return micThread.isTalking();
         }
-        client.getTalkCache().isTalking(playerId);
-        return false;
+        return client.getTalkCache().isTalking(playerId);
     }
 
     @Override
@@ -83,8 +82,31 @@ public class VoicechatClientApiImpl extends VoicechatApiImpl implements Voicecha
             }
             return micThread.isWhispering();
         }
-        client.getTalkCache().isWhispering(playerId);
-        return false;
+        return client.getTalkCache().isWhispering(playerId);
+    }
+
+    @Override
+    public de.maxhenkel.voicechat.api.VoiceMode getVoiceMode(@Nullable UUID playerId) {
+        ClientVoicechat client = ClientManager.getClient();
+        if (client == null) {
+            return de.maxhenkel.voicechat.api.VoiceMode.NORMAL;
+        }
+        if (playerId == null) {
+            MicThread micThread = client.getMicThread();
+            if (micThread == null) {
+                de.maxhenkel.voicechat.api.VoiceMode mode = VoicechatClient.CLIENT_CONFIG.voiceMode.get();
+                return mode != null ? mode : de.maxhenkel.voicechat.api.VoiceMode.NORMAL;
+            }
+            return micThread.getVoiceMode();
+        }
+        return client.getTalkCache().getVoiceMode(playerId);
+    }
+
+    @Override
+    public void setVoiceMode(de.maxhenkel.voicechat.api.VoiceMode voiceMode) {
+        if (voiceMode != null) {
+            VoicechatClient.CLIENT_CONFIG.voiceMode.set(voiceMode).save();
+        }
     }
 
     @Override

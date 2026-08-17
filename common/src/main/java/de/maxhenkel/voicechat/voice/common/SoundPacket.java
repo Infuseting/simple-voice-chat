@@ -7,6 +7,7 @@ public abstract class SoundPacket<T extends SoundPacket> implements Packet<T> {
 
     public static final byte WHISPER_MASK = 0b1;
     public static final byte HAS_CATEGORY_MASK = 0b10;
+    public static final byte SHOUT_MASK = 0b100;
 
     protected UUID channelId;
     protected UUID sender;

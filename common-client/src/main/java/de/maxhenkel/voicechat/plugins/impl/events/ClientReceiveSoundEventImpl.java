@@ -41,12 +41,22 @@ public class ClientReceiveSoundEventImpl extends ClientEventImpl implements Clie
     public static class EntitySoundImpl extends ClientReceiveSoundEventImpl implements EntitySound {
         private UUID entity;
         private boolean whispering;
+        private de.maxhenkel.voicechat.api.VoiceMode voiceMode;
         private float distance;
 
         public EntitySoundImpl(UUID id, UUID entity, short[] rawAudio, boolean whispering, float distance) {
             super(id, rawAudio);
             this.entity = entity;
             this.whispering = whispering;
+            this.voiceMode = whispering ? de.maxhenkel.voicechat.api.VoiceMode.WHISPER : de.maxhenkel.voicechat.api.VoiceMode.NORMAL;
+            this.distance = distance;
+        }
+
+        public EntitySoundImpl(UUID id, UUID entity, short[] rawAudio, de.maxhenkel.voicechat.api.VoiceMode voiceMode, float distance) {
+            super(id, rawAudio);
+            this.entity = entity;
+            this.voiceMode = voiceMode != null ? voiceMode : de.maxhenkel.voicechat.api.VoiceMode.NORMAL;
+            this.whispering = this.voiceMode == de.maxhenkel.voicechat.api.VoiceMode.WHISPER;
             this.distance = distance;
         }
 
@@ -57,7 +67,12 @@ public class ClientReceiveSoundEventImpl extends ClientEventImpl implements Clie
 
         @Override
         public boolean isWhispering() {
-            return whispering;
+            return (voiceMode != null && voiceMode.isWhispering()) || whispering;
+        }
+
+        @Override
+        public de.maxhenkel.voicechat.api.VoiceMode getVoiceMode() {
+            return voiceMode != null ? voiceMode : (whispering ? de.maxhenkel.voicechat.api.VoiceMode.WHISPER : de.maxhenkel.voicechat.api.VoiceMode.NORMAL);
         }
 
         @Override

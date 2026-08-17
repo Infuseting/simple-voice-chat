@@ -1,5 +1,6 @@
 package de.maxhenkel.voicechat.voice.client;
 
+import de.maxhenkel.voicechat.api.VoiceMode;
 import de.maxhenkel.voicechat.voice.common.AudioUtils;
 import net.minecraft.world.entity.Entity;
 
@@ -13,7 +14,7 @@ public class TalkCache {
 
     private static final long TIMEOUT = 250L;
 
-    private static final PlayerCache DEFAULT = new PlayerCache(0L, false, AudioUtils.LOWEST_DB);
+    private static final PlayerCache DEFAULT = new PlayerCache(0L, VoiceMode.NORMAL, AudioUtils.LOWEST_DB);
 
     private final Map<UUID, PlayerCache> playerCache;
     private final Map<String, CategoryCache> categoryCache;
@@ -29,14 +30,14 @@ public class TalkCache {
         this.timestampSupplier = timestampSupplier;
     }
 
-    private void updateTalking(UUID entity, boolean whispering, double audioLevel) {
+    private void updateTalking(UUID entity, VoiceMode voiceMode, double audioLevel) {
         PlayerCache talk = playerCache.get(entity);
         if (talk == null) {
-            talk = new PlayerCache(timestampSupplier.get(), whispering, audioLevel);
+            talk = new PlayerCache(timestampSupplier.get(), voiceMode, audioLevel);
             playerCache.put(entity, talk);
         } else {
             talk.timestamp = timestampSupplier.get();
-            talk.whispering = whispering;
+            talk.voiceMode = voiceMode;
             talk.audioLevel = audioLevel;
         }
     }
@@ -50,12 +51,24 @@ public class TalkCache {
      * @param audio      the audio data to calculate the audio level from
      */
     public void updateLevel(UUID id, @Nullable String category, boolean whispering, short[] audio) {
+        updateLevel(id, category, whispering ? VoiceMode.WHISPER : VoiceMode.NORMAL, audio);
+    }
+
+    /**
+     * Updates the audio level of a player talking or a specific category
+     *
+     * @param id        the entity UUID
+     * @param category  the category name or null if it is a player
+     * @param voiceMode the voice mode
+     * @param audio     the audio data to calculate the audio level from
+     */
+    public void updateLevel(UUID id, @Nullable String category, VoiceMode voiceMode, short[] audio) {
         double highestAudioLevel = AudioUtils.getHighestAudioLevel(audio);
         if (category != null) {
             updateCategoryVolume(category, highestAudioLevel);
         }
         // Update the player talking even if it is a category
-        updateTalking(id, whispering, highestAudioLevel);
+        updateTalking(id, voiceMode, highestAudioLevel);
     }
 
     public boolean isTalking(Entity entity) {
@@ -64,6 +77,10 @@ public class TalkCache {
 
     public boolean isWhispering(Entity entity) {
         return isWhispering(entity.getUUID());
+    }
+
+    public boolean isShouting(Entity entity) {
+        return isShouting(entity.getUUID());
     }
 
     public boolean isTalking(UUID entity) {
@@ -91,7 +108,33 @@ public class TalkCache {
         }
 
         PlayerCache lastTalk = playerCache.getOrDefault(entity, DEFAULT);
-        return lastTalk.whispering && timestampSupplier.get() - lastTalk.timestamp < TIMEOUT;
+        return lastTalk.voiceMode == VoiceMode.WHISPER && timestampSupplier.get() - lastTalk.timestamp < TIMEOUT;
+    }
+
+    public boolean isShouting(UUID entity) {
+        if (entity.equals(ClientManager.getPlayerStateManager().getOwnID())) {
+            ClientVoicechat client = ClientManager.getClient();
+            if (client != null && client.getMicThread() != null) {
+                if (client.getMicThread().getVoiceMode() == VoiceMode.SHOUT && client.getMicThread().isTalking()) {
+                    return true;
+                }
+            }
+        }
+
+        PlayerCache lastTalk = playerCache.getOrDefault(entity, DEFAULT);
+        return lastTalk.voiceMode == VoiceMode.SHOUT && timestampSupplier.get() - lastTalk.timestamp < TIMEOUT;
+    }
+
+    public VoiceMode getVoiceMode(UUID entity) {
+        if (entity.equals(ClientManager.getPlayerStateManager().getOwnID())) {
+            ClientVoicechat client = ClientManager.getClient();
+            if (client != null && client.getMicThread() != null) {
+                return client.getMicThread().getVoiceMode();
+            }
+        }
+
+        PlayerCache lastTalk = playerCache.getOrDefault(entity, DEFAULT);
+        return lastTalk.voiceMode != null ? lastTalk.voiceMode : VoiceMode.NORMAL;
     }
 
     public void updateCategoryVolume(String category, double audioLevel) {
@@ -126,12 +169,12 @@ public class TalkCache {
 
     private static class PlayerCache {
         private long timestamp;
-        private boolean whispering;
+        private VoiceMode voiceMode;
         private double audioLevel;
 
-        public PlayerCache(long timestamp, boolean whispering, double audioLevel) {
+        public PlayerCache(long timestamp, VoiceMode voiceMode, double audioLevel) {
             this.timestamp = timestamp;
-            this.whispering = whispering;
+            this.voiceMode = voiceMode != null ? voiceMode : VoiceMode.NORMAL;
             this.audioLevel = audioLevel;
         }
     }

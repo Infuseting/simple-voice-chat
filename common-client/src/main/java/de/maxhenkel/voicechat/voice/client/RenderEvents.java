@@ -25,9 +25,11 @@ public class RenderEvents {
 
     private static final ResourceLocation MICROPHONE_ICON = new ResourceLocation(Voicechat.MODID, "textures/icons/microphone.png");
     private static final ResourceLocation WHISPER_MICROPHONE_ICON = new ResourceLocation(Voicechat.MODID, "textures/icons/microphone_whisper.png");
+    private static final ResourceLocation SHOUT_MICROPHONE_ICON = new ResourceLocation(Voicechat.MODID, "textures/icons/microphone_shout.png");
     private static final ResourceLocation MICROPHONE_OFF_ICON = new ResourceLocation(Voicechat.MODID, "textures/icons/microphone_off.png");
     private static final ResourceLocation SPEAKER_ICON = new ResourceLocation(Voicechat.MODID, "textures/icons/speaker.png");
     private static final ResourceLocation WHISPER_SPEAKER_ICON = new ResourceLocation(Voicechat.MODID, "textures/icons/speaker_whisper.png");
+    private static final ResourceLocation SHOUT_SPEAKER_ICON = new ResourceLocation(Voicechat.MODID, "textures/icons/speaker_shout.png");
     private static final ResourceLocation SPEAKER_OFF_ICON = new ResourceLocation(Voicechat.MODID, "textures/icons/speaker_off.png");
     private static final ResourceLocation DISCONNECT_ICON = new ResourceLocation(Voicechat.MODID, "textures/icons/disconnected.png");
     private static final ResourceLocation GROUP_ICON = new ResourceLocation(Voicechat.MODID, "textures/icons/group.png");
@@ -67,6 +69,8 @@ public class RenderEvents {
         } else if (client != null && client.getMicThread() != null) {
             if (client.getMicThread().isWhispering()) {
                 renderIcon(guiGraphics, WHISPER_MICROPHONE_ICON);
+            } else if (client.getMicThread().getVoiceMode() == de.maxhenkel.voicechat.api.VoiceMode.SHOUT && client.getMicThread().isTalking()) {
+                renderIcon(guiGraphics, SHOUT_MICROPHONE_ICON);
             } else if (client.getMicThread().isTalking()) {
                 renderIcon(guiGraphics, MICROPHONE_ICON);
             }
@@ -129,6 +133,8 @@ public class RenderEvents {
 
             if (client != null && client.getTalkCache().isWhispering(player)) {
                 renderPlayerIcon(player, component, WHISPER_SPEAKER_ICON, stack, vertexConsumers, light);
+            } else if (client != null && client.getTalkCache().isShouting(player)) {
+                renderPlayerIcon(player, component, SHOUT_SPEAKER_ICON, stack, vertexConsumers, light);
             } else if (client != null && client.getTalkCache().isTalking(player)) {
                 renderPlayerIcon(player, component, SPEAKER_ICON, stack, vertexConsumers, light);
             } else if (manager.isPlayerDisconnected(player)) {

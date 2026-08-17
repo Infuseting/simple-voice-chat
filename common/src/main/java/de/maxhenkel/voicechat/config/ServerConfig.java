@@ -14,6 +14,7 @@ public class ServerConfig {
     public ConfigEntry<String> voiceChatBindAddress;
     public ConfigEntry<Double> voiceChatDistance;
     public ConfigEntry<Double> whisperDistance;
+    public ConfigEntry<Double> shoutDistance;
     public ConfigEntry<Codec> voiceChatCodec;
     public ConfigEntry<Integer> voiceChatMtuSize;
     public ConfigEntry<Integer> tcpRateLimit;
@@ -50,12 +51,16 @@ public class ServerConfig {
                         "To bind to the wildcard IP address, use '*'"
                 );
         voiceChatDistance = builder
-                .doubleEntry("max_voice_distance", 48D, 1D, 1_000_000D,
+                .doubleEntry("max_voice_distance", 32D, 1D, 1_000_000D,
                         "The distance to which the voice can be heard"
                 );
         whisperDistance = builder
-                .doubleEntry("whisper_distance", 24D, 1D, 1_000_000D,
+                .doubleEntry("whisper_distance", 12D, 1D, 1_000_000D,
                         "The distance to which the voice can be heard when whispering"
+                );
+        shoutDistance = builder
+                .doubleEntry("shout_distance", 64D, 1D, 1_000_000D,
+                        "The distance to which the voice can be heard when shouting"
                 );
         voiceChatCodec = builder
                 .enumEntry("codec", Codec.VOIP,

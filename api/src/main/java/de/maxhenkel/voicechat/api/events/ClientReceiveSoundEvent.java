@@ -46,6 +46,13 @@ public interface ClientReceiveSoundEvent extends ClientEvent {
         boolean isWhispering();
 
         /**
+         * @return the voice mode of the player
+         */
+        default de.maxhenkel.voicechat.api.VoiceMode getVoiceMode() {
+            return isWhispering() ? de.maxhenkel.voicechat.api.VoiceMode.WHISPER : de.maxhenkel.voicechat.api.VoiceMode.NORMAL;
+        }
+
+        /**
          * @return the distance, the audio can be heard
          */
         float getDistance();

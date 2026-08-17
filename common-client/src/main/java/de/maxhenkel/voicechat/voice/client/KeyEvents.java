@@ -24,6 +24,7 @@ public class KeyEvents {
 
     public static KeyMapping KEY_PTT;
     public static KeyMapping KEY_WHISPER;
+    public static KeyMapping KEY_CYCLE_VOICE_MODE;
     public static KeyMapping KEY_MUTE;
     public static KeyMapping KEY_DISABLE;
     public static KeyMapping KEY_HIDE_ICONS;
@@ -46,7 +47,8 @@ public class KeyEvents {
         }
 
         KEY_PTT = ClientCompatibilityManager.INSTANCE.registerKeyBinding(new KeyMapping("key.push_to_talk", InputConstants.UNKNOWN.getValue(), "key.categories.voicechat"));
-        KEY_WHISPER = ClientCompatibilityManager.INSTANCE.registerKeyBinding(new KeyMapping("key.whisper", InputConstants.UNKNOWN.getValue(), "key.categories.voicechat"));
+        KEY_CYCLE_VOICE_MODE = ClientCompatibilityManager.INSTANCE.registerKeyBinding(new KeyMapping("key.voice_chat_cycle_voice_mode", GLFW.GLFW_KEY_B, "key.categories.voicechat"));
+        KEY_WHISPER = KEY_CYCLE_VOICE_MODE;
         KEY_MUTE = ClientCompatibilityManager.INSTANCE.registerKeyBinding(new KeyMapping("key.mute_microphone", GLFW.GLFW_KEY_M, "key.categories.voicechat"));
         KEY_DISABLE = ClientCompatibilityManager.INSTANCE.registerKeyBinding(new KeyMapping("key.disable_voice_chat", GLFW.GLFW_KEY_N, "key.categories.voicechat"));
         KEY_HIDE_ICONS = ClientCompatibilityManager.INSTANCE.registerKeyBinding(new KeyMapping("key.hide_icons", GLFW.GLFW_KEY_H, "key.categories.voicechat"));
@@ -57,7 +59,7 @@ public class KeyEvents {
         KEY_ADJUST_VOLUMES = ClientCompatibilityManager.INSTANCE.registerKeyBinding(new KeyMapping("key.voice_chat_adjust_volumes", InputConstants.UNKNOWN.getValue(), "key.categories.voicechat"));
 
         ALL_KEYS = new KeyMapping[]{
-                KEY_PTT, KEY_WHISPER, KEY_MUTE, KEY_DISABLE, KEY_HIDE_ICONS, KEY_VOICE_CHAT, KEY_VOICE_CHAT_SETTINGS, KEY_GROUP, KEY_TOGGLE_RECORDING, KEY_ADJUST_VOLUMES
+                KEY_PTT, KEY_CYCLE_VOICE_MODE, KEY_MUTE, KEY_DISABLE, KEY_HIDE_ICONS, KEY_VOICE_CHAT, KEY_VOICE_CHAT_SETTINGS, KEY_GROUP, KEY_TOGGLE_RECORDING, KEY_ADJUST_VOLUMES
         };
     }
 
@@ -116,8 +118,23 @@ public class KeyEvents {
             checkConnected();
         }
 
-        if (KEY_WHISPER.consumeClick()) {
-            checkConnected();
+        if (KEY_CYCLE_VOICE_MODE.consumeClick()) {
+            if (checkConnected()) {
+                de.maxhenkel.voicechat.api.VoiceMode current = VoicechatClient.CLIENT_CONFIG.voiceMode.get();
+                if (current == null) {
+                    current = de.maxhenkel.voicechat.api.VoiceMode.NORMAL;
+                }
+                de.maxhenkel.voicechat.api.VoiceMode next;
+                if (current == de.maxhenkel.voicechat.api.VoiceMode.WHISPER) {
+                    next = de.maxhenkel.voicechat.api.VoiceMode.NORMAL;
+                } else if (current == de.maxhenkel.voicechat.api.VoiceMode.NORMAL) {
+                    next = de.maxhenkel.voicechat.api.VoiceMode.SHOUT;
+                } else {
+                    next = de.maxhenkel.voicechat.api.VoiceMode.WHISPER;
+                }
+                VoicechatClient.CLIENT_CONFIG.voiceMode.set(next).save();
+                player.displayClientMessage(Component.translatable("message.voicechat.voice_mode." + next.name().toLowerCase()), true);
+            }
         }
 
         if (KEY_MUTE.consumeClick()) {

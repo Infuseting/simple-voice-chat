@@ -38,6 +38,16 @@ public class EntityAudioChannelImpl extends AudioChannelImpl implements EntityAu
     }
 
     @Override
+    public de.maxhenkel.voicechat.api.VoiceMode getVoiceMode() {
+        return whispering ? de.maxhenkel.voicechat.api.VoiceMode.WHISPER : de.maxhenkel.voicechat.api.VoiceMode.NORMAL;
+    }
+
+    @Override
+    public void setVoiceMode(de.maxhenkel.voicechat.api.VoiceMode voiceMode) {
+        this.whispering = voiceMode == de.maxhenkel.voicechat.api.VoiceMode.WHISPER;
+    }
+
+    @Override
     public void updateEntity(Entity entity) {
         this.entity = entity;
     }

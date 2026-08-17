@@ -26,6 +26,7 @@ public class ClientConfig {
     public ConfigEntry<Double> microphoneGain;
     public ConfigEntry<Boolean> agc;
     public ConfigEntry<MicrophoneActivationType> microphoneActivationType;
+    public ConfigEntry<de.maxhenkel.voicechat.api.VoiceMode> voiceMode;
     public ConfigEntry<Integer> outputBufferSize;
     public ConfigEntry<Integer> audioPacketThreshold;
     public ConfigEntry<Integer> voiceDeactivationDelay;
@@ -96,6 +97,11 @@ public class ClientConfig {
                 .enumEntry("microphone_activation_type", MicrophoneActivationType.PTT,
                         "The microphone activation method",
                         "Valid values are 'PTT' and 'VOICE'"
+                );
+        voiceMode = builder
+                .enumEntry("voice_mode", de.maxhenkel.voicechat.api.VoiceMode.NORMAL,
+                        "The voice mode level",
+                        "Valid values are 'WHISPER', 'NORMAL', and 'SHOUT'"
                 );
         outputBufferSize = builder
                 .integerEntry("output_buffer_size", 5, 1, 16,

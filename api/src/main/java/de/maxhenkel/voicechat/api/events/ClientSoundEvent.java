@@ -1,5 +1,7 @@
 package de.maxhenkel.voicechat.api.events;
 
+import de.maxhenkel.voicechat.api.VoiceMode;
+
 /**
  * This event is emitted before the client encodes the audio and sends it to the server.
  */
@@ -25,5 +27,12 @@ public interface ClientSoundEvent extends ClientEvent {
      * @return if the player is whispering
      */
     boolean isWhispering();
+
+    /**
+     * @return the voice mode of the player
+     */
+    default VoiceMode getVoiceMode() {
+        return isWhispering() ? VoiceMode.WHISPER : VoiceMode.NORMAL;
+    }
 
 }

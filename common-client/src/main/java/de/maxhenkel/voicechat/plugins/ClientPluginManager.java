@@ -61,7 +61,12 @@ public class ClientPluginManager {
 
     @Nullable
     public short[] onClientSound(short[] rawAudio, boolean whispering) {
-        ClientSoundEventImpl clientSoundEvent = new ClientSoundEventImpl(rawAudio, whispering);
+        return onClientSound(rawAudio, whispering ? de.maxhenkel.voicechat.api.VoiceMode.WHISPER : de.maxhenkel.voicechat.api.VoiceMode.NORMAL);
+    }
+
+    @Nullable
+    public short[] onClientSound(short[] rawAudio, de.maxhenkel.voicechat.api.VoiceMode voiceMode) {
+        ClientSoundEventImpl clientSoundEvent = new ClientSoundEventImpl(rawAudio, voiceMode);
         boolean cancelled = pluginManager.dispatchEvent(ClientSoundEvent.class, clientSoundEvent);
         if (cancelled) {
             return null;
@@ -70,7 +75,11 @@ public class ClientPluginManager {
     }
 
     public short[] onReceiveEntityClientSound(UUID id, UUID entity, short[] rawAudio, boolean whispering, float distance) {
-        ClientReceiveSoundEventImpl.EntitySoundImpl clientSoundEvent = new ClientReceiveSoundEventImpl.EntitySoundImpl(id, entity, rawAudio, whispering, distance);
+        return onReceiveEntityClientSound(id, entity, rawAudio, whispering ? de.maxhenkel.voicechat.api.VoiceMode.WHISPER : de.maxhenkel.voicechat.api.VoiceMode.NORMAL, distance);
+    }
+
+    public short[] onReceiveEntityClientSound(UUID id, UUID entity, short[] rawAudio, de.maxhenkel.voicechat.api.VoiceMode voiceMode, float distance) {
+        ClientReceiveSoundEventImpl.EntitySoundImpl clientSoundEvent = new ClientReceiveSoundEventImpl.EntitySoundImpl(id, entity, rawAudio, voiceMode, distance);
         pluginManager.dispatchEvent(ClientReceiveSoundEvent.EntitySound.class, clientSoundEvent);
         return clientSoundEvent.getRawAudio();
     }

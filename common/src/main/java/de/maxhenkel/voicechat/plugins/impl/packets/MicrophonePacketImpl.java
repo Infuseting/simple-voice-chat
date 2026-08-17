@@ -27,6 +27,16 @@ public class MicrophonePacketImpl implements MicrophonePacket {
     }
 
     @Override
+    public de.maxhenkel.voicechat.api.VoiceMode getVoiceMode() {
+        return packet.getVoiceMode();
+    }
+
+    @Override
+    public void setVoiceMode(de.maxhenkel.voicechat.api.VoiceMode voiceMode) {
+        packet.setVoiceMode(voiceMode);
+    }
+
+    @Override
     public byte[] getOpusEncodedData() {
         return packet.getData();
     }

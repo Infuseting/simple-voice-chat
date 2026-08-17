@@ -19,6 +19,20 @@ public interface EntityAudioChannel extends AudioChannel {
     void setWhispering(boolean whispering);
 
     /**
+     * @return the voice mode of the entity
+     */
+    default de.maxhenkel.voicechat.api.VoiceMode getVoiceMode() {
+        return isWhispering() ? de.maxhenkel.voicechat.api.VoiceMode.WHISPER : de.maxhenkel.voicechat.api.VoiceMode.NORMAL;
+    }
+
+    /**
+     * @param voiceMode the voice mode to set
+     */
+    default void setVoiceMode(de.maxhenkel.voicechat.api.VoiceMode voiceMode) {
+        setWhispering(voiceMode == de.maxhenkel.voicechat.api.VoiceMode.WHISPER);
+    }
+
+    /**
      * Sets a new entity where this channel is attached to.
      *
      * @param entity the entity to attach the channel to

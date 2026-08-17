@@ -27,6 +27,11 @@ public class EntitySoundPacketImpl extends SoundPacketImpl implements EntitySoun
     }
 
     @Override
+    public de.maxhenkel.voicechat.api.VoiceMode getVoiceMode() {
+        return packet.getVoiceMode();
+    }
+
+    @Override
     public float getDistance() {
         return packet.getDistance();
     }
@@ -45,6 +50,7 @@ public class EntitySoundPacketImpl extends SoundPacketImpl implements EntitySoun
 
         protected UUID entityUuid;
         protected boolean whispering;
+        protected de.maxhenkel.voicechat.api.VoiceMode voiceMode;
         protected float distance;
 
         public BuilderImpl(SoundPacketImpl soundPacket) {
@@ -52,6 +58,7 @@ public class EntitySoundPacketImpl extends SoundPacketImpl implements EntitySoun
             if (soundPacket instanceof EntitySoundPacketImpl p) {
                 entityUuid = p.getEntityUuid();
                 whispering = p.isWhispering();
+                voiceMode = p.getVoiceMode();
                 distance = p.getDistance();
             } else if (soundPacket instanceof LocationalSoundPacketImpl p) {
                 distance = p.getDistance();
@@ -74,6 +81,14 @@ public class EntitySoundPacketImpl extends SoundPacketImpl implements EntitySoun
         @Override
         public BuilderImpl whispering(boolean whispering) {
             this.whispering = whispering;
+            this.voiceMode = whispering ? de.maxhenkel.voicechat.api.VoiceMode.WHISPER : de.maxhenkel.voicechat.api.VoiceMode.NORMAL;
+            return this;
+        }
+
+        @Override
+        public BuilderImpl voiceMode(de.maxhenkel.voicechat.api.VoiceMode voiceMode) {
+            this.voiceMode = voiceMode;
+            this.whispering = voiceMode != null && voiceMode.isWhispering();
             return this;
         }
 
@@ -88,7 +103,8 @@ public class EntitySoundPacketImpl extends SoundPacketImpl implements EntitySoun
             if (entityUuid == null) {
                 throw new IllegalStateException("entityUuid missing");
             }
-            return new EntitySoundPacketImpl(new PlayerSoundPacket(channelId, sender, opusEncodedData, sequenceNumber, whispering, distance, category));
+            de.maxhenkel.voicechat.api.VoiceMode mode = voiceMode != null ? voiceMode : (whispering ? de.maxhenkel.voicechat.api.VoiceMode.WHISPER : de.maxhenkel.voicechat.api.VoiceMode.NORMAL);
+            return new EntitySoundPacketImpl(new PlayerSoundPacket(channelId, sender, opusEncodedData, sequenceNumber, mode, distance, category));
         }
 
     }

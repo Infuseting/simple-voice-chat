@@ -20,6 +20,20 @@ public interface ClientEntityAudioChannel extends ClientAudioChannel {
     boolean isWhispering();
 
     /**
+     * @return the voice mode of the entity
+     */
+    default de.maxhenkel.voicechat.api.VoiceMode getVoiceMode() {
+        return isWhispering() ? de.maxhenkel.voicechat.api.VoiceMode.WHISPER : de.maxhenkel.voicechat.api.VoiceMode.NORMAL;
+    }
+
+    /**
+     * @param voiceMode the voice mode to set
+     */
+    default void setVoiceMode(de.maxhenkel.voicechat.api.VoiceMode voiceMode) {
+        setWhispering(voiceMode == de.maxhenkel.voicechat.api.VoiceMode.WHISPER);
+    }
+
+    /**
      * @return the distance, the audio can be heard
      */
     float getDistance();

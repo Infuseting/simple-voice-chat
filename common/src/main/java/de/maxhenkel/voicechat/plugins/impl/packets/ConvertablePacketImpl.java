@@ -106,6 +106,7 @@ public class ConvertablePacketImpl implements ConvertablePacket {
 
         protected UUID entityUuid;
         protected boolean whispering;
+        protected de.maxhenkel.voicechat.api.VoiceMode voiceMode;
         protected Float distance;
 
         public GenericEntitySoundPacketBuilder() {
@@ -121,6 +122,14 @@ public class ConvertablePacketImpl implements ConvertablePacket {
         @Override
         public GenericEntitySoundPacketBuilder whispering(boolean whispering) {
             this.whispering = whispering;
+            this.voiceMode = whispering ? de.maxhenkel.voicechat.api.VoiceMode.WHISPER : de.maxhenkel.voicechat.api.VoiceMode.NORMAL;
+            return this;
+        }
+
+        @Override
+        public GenericEntitySoundPacketBuilder voiceMode(de.maxhenkel.voicechat.api.VoiceMode voiceMode) {
+            this.voiceMode = voiceMode;
+            this.whispering = voiceMode != null && voiceMode.isWhispering();
             return this;
         }
 
@@ -139,7 +148,8 @@ public class ConvertablePacketImpl implements ConvertablePacket {
             if (distance == null) {
                 distance = Utils.getDefaultDistanceServer();
             }
-            return new EntitySoundPacketImpl(new PlayerSoundPacket(channelId, sender, opusEncodedData, sequenceNumber, whispering, distance, category));
+            de.maxhenkel.voicechat.api.VoiceMode mode = voiceMode != null ? voiceMode : (whispering ? de.maxhenkel.voicechat.api.VoiceMode.WHISPER : de.maxhenkel.voicechat.api.VoiceMode.NORMAL);
+            return new EntitySoundPacketImpl(new PlayerSoundPacket(channelId, sender, opusEncodedData, sequenceNumber, mode, distance, category));
         }
     }
 

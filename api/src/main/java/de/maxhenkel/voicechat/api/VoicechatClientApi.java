@@ -77,6 +77,32 @@ public interface VoicechatClientApi extends VoicechatApi {
     boolean isWhispering(@Nullable UUID playerId);
 
     /**
+     * Does the same as {@link #getVoiceMode(UUID)} with <code>null</code> as the player UUID.
+     *
+     * @return the voice mode of the local player
+     */
+    default VoiceMode getVoiceMode() {
+        return getVoiceMode(null);
+    }
+
+    /**
+     * @param playerId the UUID of the player or <code>null</code> for the local player
+     * @return the voice mode of the player
+     */
+    default VoiceMode getVoiceMode(@Nullable UUID playerId) {
+        return isWhispering(playerId) ? VoiceMode.WHISPER : VoiceMode.NORMAL;
+    }
+
+    /**
+     * Sets the local voice mode.
+     *
+     * @param voiceMode the voice mode to set
+     */
+    default void setVoiceMode(VoiceMode voiceMode) {
+
+    }
+
+    /**
      * This method returns if the push to talk key is pressed, even when using voice activation.
      *
      * @return if the push to talk key is pressed

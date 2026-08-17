@@ -19,6 +19,7 @@ public abstract class MicrophoneProcessor {
     private final VolumeManager volumeManager;
     private boolean whispering;
     private boolean activating;
+    private de.maxhenkel.voicechat.api.VoiceMode voiceMode = de.maxhenkel.voicechat.api.VoiceMode.NORMAL;
     protected float speechProbability;
     @Nullable
     private Denoiser denoiser;
@@ -70,11 +71,19 @@ public abstract class MicrophoneProcessor {
         preprocess(audio);
         boolean a = processInternal(audio, testing);
         activating = micActivator.shouldStillSend(a);
+        de.maxhenkel.voicechat.api.VoiceMode activeMode = VoicechatClient.CLIENT_CONFIG.voiceMode.get();
+        if (activeMode == null) {
+            activeMode = de.maxhenkel.voicechat.api.VoiceMode.NORMAL;
+        }
+        if (w) {
+            activeMode = de.maxhenkel.voicechat.api.VoiceMode.WHISPER;
+        }
+        this.voiceMode = activeMode;
         if (a) {
-            whispering = w;
+            whispering = this.voiceMode == de.maxhenkel.voicechat.api.VoiceMode.WHISPER;
             whisperMicActivator.reset();
         } else {
-            whispering = !isMuted() && whisperMicActivator.shouldStillSend(w);
+            whispering = !isMuted() && (this.voiceMode == de.maxhenkel.voicechat.api.VoiceMode.WHISPER || whisperMicActivator.shouldStillSend(w));
         }
     }
 
@@ -89,7 +98,11 @@ public abstract class MicrophoneProcessor {
     }
 
     public boolean isWhispering() {
-        return whispering;
+        return voiceMode == de.maxhenkel.voicechat.api.VoiceMode.WHISPER && shouldTransmitAudio();
+    }
+
+    public de.maxhenkel.voicechat.api.VoiceMode getVoiceMode() {
+        return voiceMode != null ? voiceMode : de.maxhenkel.voicechat.api.VoiceMode.NORMAL;
     }
 
     public boolean shouldTransmitAudio() {

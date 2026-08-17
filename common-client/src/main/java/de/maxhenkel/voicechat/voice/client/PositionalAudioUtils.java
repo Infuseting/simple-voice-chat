@@ -1,6 +1,7 @@
 package de.maxhenkel.voicechat.voice.client;
 
 import de.maxhenkel.voicechat.VoicechatClient;
+import de.maxhenkel.voicechat.integration.freecam.FreecamUtil;
 import de.maxhenkel.voicechat.voice.client.speaker.AudioType;
 import de.maxhenkel.voicechat.voice.common.Utils;
 import net.minecraft.client.Camera;
@@ -54,7 +55,12 @@ public class PositionalAudioUtils {
      */
     private static float[] getStereoVolume(Vec3 soundPos) {
         Camera mainCamera = mc.gameRenderer.getMainCamera();
-        return getStereoVolume(mainCamera.getPosition(), mainCamera.getYRot(), soundPos);
+        Vec3 listenerPos = FreecamUtil.getReferencePoint();
+        float yRot = mainCamera.getYRot();
+        if (mc.options.getCameraType().isMirrored()) {
+            yRot += 180F;
+        }
+        return getStereoVolume(listenerPos, yRot, soundPos);
     }
 
     /**
@@ -65,7 +71,7 @@ public class PositionalAudioUtils {
      * @return the resulting audio volume
      */
     public static float getDistanceVolume(float maxDistance, Vec3 pos) {
-        return getDistanceVolume(maxDistance, mc.gameRenderer.getMainCamera().getPosition(), pos);
+        return getDistanceVolume(maxDistance, FreecamUtil.getReferencePoint(), pos);
     }
 
     /**
@@ -168,11 +174,19 @@ public class PositionalAudioUtils {
     }
 
     public static short[] convertToStereoForRecording(float maxDistance, Vec3 pos, short[] monoData) {
-        return convertToStereoForRecording(maxDistance, mc.gameRenderer.getMainCamera().getPosition(), mc.gameRenderer.getMainCamera().getYRot(), pos, monoData);
+        float yRot = mc.gameRenderer.getMainCamera().getYRot();
+        if (mc.options.getCameraType().isMirrored()) {
+            yRot += 180F;
+        }
+        return convertToStereoForRecording(maxDistance, FreecamUtil.getReferencePoint(), yRot, pos, monoData);
     }
 
     public static short[] convertToStereoForRecording(float maxDistance, Vec3 pos, short[] monoData, float volume) {
-        return convertToStereoForRecording(maxDistance, mc.gameRenderer.getMainCamera().getPosition(), mc.gameRenderer.getMainCamera().getYRot(), pos, monoData, volume);
+        float yRot = mc.gameRenderer.getMainCamera().getYRot();
+        if (mc.options.getCameraType().isMirrored()) {
+            yRot += 180F;
+        }
+        return convertToStereoForRecording(maxDistance, FreecamUtil.getReferencePoint(), yRot, pos, monoData, volume);
     }
 
     public static short[] convertToStereoForRecording(float maxDistance, Vec3 cameraPos, float yRot, Vec3 pos, short[] monoData) {

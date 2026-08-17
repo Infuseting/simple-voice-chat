@@ -110,7 +110,7 @@ public class MicThread extends Thread {
                 processed = null;
             }
 
-            sendAudio(processed, microphoneProcessor.isWhispering());
+            sendAudio(processed, microphoneProcessor.getVoiceMode());
         }
     }
 
@@ -181,22 +181,22 @@ public class MicThread extends Thread {
      * If {@param rawAudio} is null and no audio is being injected, a stop packet will be sent.
      * This needs to get called every microphone poll, even if no mic audio should be sent.
      *
-     * @param rawAudio   the raw audio or
-     * @param whispering whether the player is whispering
+     * @param rawAudio  the raw audio or
+     * @param voiceMode the voice mode
      */
-    private void sendAudio(@Nullable short[] rawAudio, boolean whispering) {
+    private void sendAudio(@Nullable short[] rawAudio, de.maxhenkel.voicechat.api.VoiceMode voiceMode) {
         @Nullable short[] mergedAudio = ClientPluginManager.instance().onMergeClientSound(rawAudio);
         if (mergedAudio == null) {
             flushIfNeeded();
             return;
         }
-        short[] finalAudio = ClientPluginManager.instance().onClientSound(mergedAudio, whispering);
+        short[] finalAudio = ClientPluginManager.instance().onClientSound(mergedAudio, voiceMode);
         if (finalAudio == null) {
             flushIfNeeded();
             return;
         }
 
-        sendAudioPacket(finalAudio, whispering);
+        sendAudioPacket(finalAudio, voiceMode);
         hasSentAudio = true;
     }
 
@@ -214,6 +214,10 @@ public class MicThread extends Thread {
 
     public boolean isWhispering() {
         return microphoneProcessor.isWhispering();
+    }
+
+    public de.maxhenkel.voicechat.api.VoiceMode getVoiceMode() {
+        return microphoneProcessor.getVoiceMode();
     }
 
     public boolean shouldTransmitAudio() {
@@ -254,10 +258,10 @@ public class MicThread extends Thread {
     private final AtomicLong sequenceNumber = new AtomicLong();
     private volatile boolean stopPacketSent = true;
 
-    private void sendAudioPacket(short[] audio, boolean whispering) {
+    private void sendAudioPacket(short[] audio, de.maxhenkel.voicechat.api.VoiceMode voiceMode) {
         if (connection != null && connection.isInitialized()) {
             byte[] encoded = encoder.encode(audio);
-            connection.sendToServer(new NetworkMessage(new MicPacket(encoded, whispering, sequenceNumber.getAndIncrement())));
+            connection.sendToServer(new NetworkMessage(new MicPacket(encoded, voiceMode, sequenceNumber.getAndIncrement())));
             stopPacketSent = false;
         }
         try {
@@ -278,7 +282,7 @@ public class MicThread extends Thread {
         if (connection == null || !connection.isInitialized()) {
             return;
         }
-        connection.sendToServer(new NetworkMessage(new MicPacket(new byte[0], false, sequenceNumber.getAndIncrement())));
+        connection.sendToServer(new NetworkMessage(new MicPacket(new byte[0], de.maxhenkel.voicechat.api.VoiceMode.NORMAL, sequenceNumber.getAndIncrement())));
         stopPacketSent = true;
     }
 }

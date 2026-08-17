@@ -406,8 +406,11 @@ public class Server extends Thread {
     private void processProximityPacket(PlayerState senderState, ServerPlayer sender, MicPacket packet) {
         @Nullable UUID groupId = senderState.getGroup();
         float distance;
-        if (packet.isWhispering()) {
+        de.maxhenkel.voicechat.api.VoiceMode voiceMode = packet.getVoiceMode();
+        if (voiceMode == de.maxhenkel.voicechat.api.VoiceMode.WHISPER) {
             distance = Voicechat.SERVER_CONFIG.whisperDistance.get().floatValue();
+        } else if (voiceMode == de.maxhenkel.voicechat.api.VoiceMode.SHOUT) {
+            distance = Voicechat.SERVER_CONFIG.shoutDistance.get().floatValue();
         } else {
             distance = Utils.getDefaultDistanceServer();
         }
@@ -433,13 +436,13 @@ public class Server extends Thread {
                 }
             }
             if (Voicechat.SERVER_CONFIG.spectatorInteraction.get()) {
-                soundPacket = new LocationSoundPacket(sender.getUUID(), sender.getUUID(), sender.getEyePosition(), packet.getData(), packet.getSequenceNumber(), distance, null);
+                soundPacket = new LocationSoundPacket(sender.getUUID(), sender.getUUID(), sender.getEyePosition(), packet.getData(), packet.getSequenceNumber(), voiceMode, distance, null);
                 source = SoundPacketEvent.SOURCE_SPECTATOR;
             }
         }
 
         if (soundPacket == null) {
-            soundPacket = new PlayerSoundPacket(sender.getUUID(), sender.getUUID(), packet.getData(), packet.getSequenceNumber(), packet.isWhispering(), distance, null);
+            soundPacket = new PlayerSoundPacket(sender.getUUID(), sender.getUUID(), packet.getData(), packet.getSequenceNumber(), voiceMode, distance, null);
             source = SoundPacketEvent.SOURCE_PROXIMITY;
         }
 

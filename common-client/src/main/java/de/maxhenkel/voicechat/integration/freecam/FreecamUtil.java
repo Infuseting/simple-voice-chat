@@ -20,7 +20,7 @@ public class FreecamUtil {
     }
 
     /**
-     * Gets the proximity reference point. Unless freecam is active, this is the main camera's position.
+     * Gets the proximity reference point. Defaults to the player's eye position so that third-person (F5) mode does not displace the listener position.
      *
      * @return the position distances should be measured from
      */
@@ -28,7 +28,10 @@ public class FreecamUtil {
         if (mc.player == null) {
             return Vec3.ZERO;
         }
-        return isFreecamEnabled() ? mc.player.getEyePosition() : mc.gameRenderer.getMainCamera().getPosition();
+        if (VoicechatClient.CLIENT_CONFIG.freecamMode.get().equals(FreecamMode.CAMERA) && !mc.player.equals(mc.getCameraEntity())) {
+            return mc.gameRenderer.getMainCamera().getPosition();
+        }
+        return mc.player.getEyePosition();
     }
 
     /**

@@ -1,5 +1,7 @@
 package de.maxhenkel.voicechat.api.packets;
 
+import de.maxhenkel.voicechat.api.VoiceMode;
+
 import java.util.UUID;
 
 /**
@@ -18,6 +20,13 @@ public interface EntitySoundPacket extends SoundPacket {
      * @return if the entity is whispering
      */
     boolean isWhispering();
+
+    /**
+     * @return the voice mode of the entity
+     */
+    default VoiceMode getVoiceMode() {
+        return isWhispering() ? VoiceMode.WHISPER : VoiceMode.NORMAL;
+    }
 
     /**
      * @return the distance, the audio can be heard
@@ -46,6 +55,14 @@ public interface EntitySoundPacket extends SoundPacket {
          * @return the builder
          */
         T whispering(boolean whispering);
+
+        /**
+         * @param voiceMode the voice mode
+         * @return the builder
+         */
+        default T voiceMode(VoiceMode voiceMode) {
+            return whispering(voiceMode == VoiceMode.WHISPER);
+        }
 
         /**
          * @param distance the distance, this packet can be heard
